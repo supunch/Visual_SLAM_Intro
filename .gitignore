@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+#IDE rubbish
+*.kdev4
+
+# Folders
+**/build
+**/build-*
+
+
+**/.vscode
