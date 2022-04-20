@@ -6,28 +6,7 @@
 using namespace cv;
 using namespace std;
 
-bool getFileContent(string fileName, vector<double> & vecOfStrs)
-{
-    // Open the File
-    ifstream in(fileName.c_str());
-    // Check if object is valid
-    if(!in)
-    {
-        cerr << "Cannot open the File : "<<fileName<<endl;
-        return false;
-    }
-    string str;
-    // Read the next line from File untill it reaches the end.
-    while (getline(in, str))
-    {
-        // Line contains string of length > 0 then save it in vector
-        if(str.size() > 0)
-            vecOfStrs.push_back(stod(str));
-    }
-    //Close The File
-    in.close();
-    return true;
-}
+
 
 
 int main( int argc, char** argv )
@@ -37,11 +16,7 @@ int main( int argc, char** argv )
     string time_file = "/home/vagrant/shared/Kitti/00/times.txt";
 
     vector<double> timesteps;
-
     getFileContent(time_file,timesteps);
-
-
-
 
     ofstream myfile;
     myfile.open ("traj.txt");
@@ -55,7 +30,7 @@ int main( int argc, char** argv )
     img_1 = imread(filename1);
     img_2 = imread(filename2);
 
-    cout << timesteps[4500] << endl;
+    cout << timesteps[4540] << endl;
 
 
 
