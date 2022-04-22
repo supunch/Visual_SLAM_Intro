@@ -19,8 +19,8 @@
 #include <iostream>
 #include <iomanip>
 #include <ctype.h>
-#include <algorithm> // for copy
-#include <iterator> // for ostream_iterator
+#include <algorithm> 
+#include <iterator> 
 #include <vector>
 #include <ctime>
 #include <sstream>
@@ -29,6 +29,99 @@
 
 using namespace cv;
 using namespace std;
+
+void featureTracking(Mat img_1, Mat img_2, vector<Point2f>& points1, vector<Point2f>& points2, vector<uchar>& status)
+{ 
+    vector<float> err;					
+    Size winSize=Size(21,21);																								
+    TermCriteria termcrit=TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 30, 0.01);
+
+    calcOpticalFlowPyrLK(img_1, img_2, points1, points2, status, err, winSize, 3, termcrit, 0, 0.001);
+
+    int indexCorrection = 0;
+    for( int i=0; i<status.size(); i++)
+    {  
+        Point2f pt = points2.at(i- indexCorrection);
+        if ((status.at(i) == 0)||(pt.x<0)||(pt.y<0))
+        {
+            if((pt.x<0)||(pt.y<0))
+            {
+                status.at(i) = 0;
+            }
+            points1.erase (points1.begin() + (i - indexCorrection));
+            points2.erase (points2.begin() + (i - indexCorrection));
+            indexCorrection++;
+        }
+    }
+}
+
+void featureDetection(Mat img_1, vector<Point2f>& points1)	{   
+    vector<KeyPoint> keypoints_1;
+    int fast_threshold = 20;
+    bool nonmaxSuppression = true;
+    FAST(img_1, keypoints_1, fast_threshold, nonmaxSuppression);
+    KeyPoint::convert(keypoints_1, points1, vector<int>());
+}
+
+double getAbsoluteScale(int frame_id)	
+{
+    string line;
+    int i = 0;
+    ifstream myfile ("/home/vagrant/shared/Kitti/00/00.txt");
+    double x =0, y=0, z = 0;
+    double x_prev, y_prev, z_prev;
+    if (myfile.is_open())
+    {   
+        while (( getline (myfile,line) ) && (i<=frame_id))
+        {
+            z_prev = z;
+            x_prev = x;
+            y_prev = y;
+            std::istringstream in(line);
+
+            for (int j=0; j<12; j++)  
+            {
+                in >> z ;
+                if (j==7) y=z;
+                if (j==3)  x=z;
+            }
+            // cout << x << " " << y << " " << z << '\n';
+            i++;
+        }
+        myfile.close();
+    }
+    else 
+    {
+        cout << "Unable to open file";
+        return 0;
+    }
+
+    return sqrt((x-x_prev)*(x-x_prev) + (y-y_prev)*(y-y_prev) + (z-z_prev)*(z-z_prev)) ;
+
+}
+
+bool getFileContent(string fileName, vector<double> & vec)
+{
+    // Open the File
+    ifstream in(fileName.c_str());
+    // Check if object is valid
+    if(!in)
+    {
+        cerr << "Cannot open the File : "<<fileName<<endl;
+        return false;
+    }
+    string str;
+    // Read the next line from File untill it reaches the end.
+    while (getline(in, str))
+    {
+        // Line contains string of length > 0 then save it in vector
+        if(str.size() > 0)
+            vec.push_back(stod(str));
+    }
+    //Close The File
+    in.close();
+    return true;
+}
 
 Eigen::Matrix<double,3,3> toMatrix3d(const cv::Mat &cvMat3)
 {
@@ -55,25 +148,3 @@ std::vector<double> getQuaternion(const cv::Mat &M)
     return v;
 }
 
-bool getFileContent(string fileName, vector<double> & vecOfStrs)
-{
-    // Open the File
-    ifstream in(fileName.c_str());
-    // Check if object is valid
-    if(!in)
-    {
-        cerr << "Cannot open the File : "<<fileName<<endl;
-        return false;
-    }
-    string str;
-    // Read the next line from File untill it reaches the end.
-    while (getline(in, str))
-    {
-        // Line contains string of length > 0 then save it in vector
-        if(str.size() > 0)
-            vecOfStrs.push_back(stod(str));
-    }
-    //Close The File
-    in.close();
-    return true;
-}

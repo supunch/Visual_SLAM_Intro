@@ -21,7 +21,7 @@ SET( G2O_ROOT /home/vagrant/g2o )
 include_directories("/usr/include/eigen3")
 
 # OpenCV
-find_package(OpenCV 3.1 REQUIRED)
+find_package(OpenCV 3.0 REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 # pangolin
