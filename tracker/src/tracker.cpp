@@ -10,10 +10,10 @@ using namespace std;
 int main( int argc, char** argv )
 {
     Mat img_1, img_2;
-    Mat R_f, t_f; 
+    Mat R_f, t_f;
 
+    //  Get timesteps from KITTI to save trajectory in TUM format
     string time_file = "/home/vagrant/shared/Kitti/00/times.txt";
-
     vector<double> timesteps;
     getFileContent(time_file,timesteps);
     
@@ -86,15 +86,12 @@ int main( int argc, char** argv )
 
         E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
         recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
-        scale = getAbsoluteScale(numFrame);
+        // scale = getAbsoluteScale(numFrame); // Cheat to get scale from groundtruth file.
 
-        if ((scale>0.1)&&(t.at<double>(2) > t.at<double>(0)) && (t.at<double>(2) > t.at<double>(1))) 
-        {
-            t_f = t_f + scale*(R_f*t);
-            R_f = R*R_f;
-        }
-        else{}
-
+        
+        t_f = t_f + (R_f*t);
+        R_f = R*R_f;
+        
         vector<double> Quat(4);
         Quat = getQuaternion(R_f);
         myfile << setprecision(6) << timesteps[numFrame] << setprecision(7) << " " << t_f.at<double>(0) << " " << t_f.at<double>(1) << " " << t_f.at<double>(2)
