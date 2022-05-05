@@ -95,7 +95,7 @@ double getAbsoluteScale(int frame_id)
 {
     string line;
     int i = 0;
-    ifstream myfile ("/home/vagrant/shared/Kitti/00/00.txt");
+    ifstream myfile ("/home/vagrant/shared/Kitti/01/00.txt");
     double x =0, y=0, z = 0;
     double x_prev, y_prev, z_prev;
     if (myfile.is_open())
@@ -147,4 +147,34 @@ bool getFileContent(string fileName, vector<double> & vec)
     //Close The File
     in.close();
     return true;
+}
+
+void triangulation(const vector<Point2f> &prevPts, const vector<Point2f> &currPts, const Mat &prevR, const Mat &prevT, const Mat &currR, const Mat &currT,  vector<Point3d> &points) 
+{
+    // Mat T1 = (Mat_<float>(3, 4) <<
+    //             prevR.at<double>(0, 0), prevR.at<double>(0, 1), prevR.at<double>(0, 2), prevT.at<double>(0, 0),
+    //             prevR.at<double>(1, 0), prevR.at<double>(1, 1), prevR.at<double>(1, 2), prevT.at<double>(1, 0),
+    //             prevR.at<double>(2, 0), prevR.at<double>(2, 1), prevR.at<double>(2, 2), prevT.at<double>(2, 0));
+
+    Mat T1 = (Mat_<float>(3, 4) <<
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0);
+
+    Mat T2 = (Mat_<float>(3, 4) <<
+                currR.at<double>(0, 0), currR.at<double>(0, 1), currR.at<double>(0, 2), currT.at<double>(0, 0),
+                currR.at<double>(1, 0), currR.at<double>(1, 1), currR.at<double>(1, 2), currT.at<double>(1, 0),
+                currR.at<double>(2, 0), currR.at<double>(2, 1), currR.at<double>(2, 2), currT.at<double>(2, 0));
+    
+    Mat pts_4d;
+    triangulatePoints(T1, T2, prevPts, currPts, pts_4d);
+
+    for (int i = 0; i < pts_4d.cols; i++) 
+    {
+        Mat x = pts_4d.col(i);
+        x /= x.at<float>(2, 0);
+
+        Point3d p( x.at<float>(0, 0), x.at<float>(1, 0), x.at<float>(2, 0) );
+        points.push_back(p);
+    }
 }
