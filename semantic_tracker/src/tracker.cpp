@@ -97,12 +97,12 @@ int main( int argc, char** argv )
     prevR = currR;
     prevT = currT;
 
-    cout << " curr points" << " "  << currPoints3d.size() << endl;
+    // cout << " curr points" << " "  << currPoints3d.size() << endl;
 
-    for (size_t j=0; j < currPoints3d.size()-1; j++) 
-    {
-        cout << " curr points" << " " << currPoints3d[j] << endl;
-    }
+    // for (size_t j=0; j < currPoints3d.size()-1; j++) 
+    // {
+    //     cout << " curr points" << " " << currPoints3d[j] << endl;
+    // }
 
     char filename[100];
 
@@ -115,147 +115,148 @@ int main( int argc, char** argv )
             << " " << Quat[0] << " " << Quat[1] << " " << Quat[2] << " " << Quat[3] << endl;
 
     namedWindow( "Road facing camera", WINDOW_AUTOSIZE );
-    namedWindow( "Trajectory", WINDOW_AUTOSIZE );
+    // namedWindow( "Trajectory", WINDOW_AUTOSIZE );
 
-    Mat traj = Mat::zeros(600, 600, CV_8UC3);
+    imshow( "Road facing camera", prevImage );
+    waitKey(1000);
+
+    // Mat traj = Mat::zeros(600, 600, CV_8UC3);
 
     
 
-    for(int numFrame=2; numFrame < MAX_FRAME; numFrame++)	
-    {
-        // debugfile << "" << endl;
-        // debugfile << " Prev frame "<<  numFrame-1 << "- R " << prevR << endl;
-        // debugfile << " Prev frame "<<  numFrame-1 << "- t " << prevT << endl;
+    // for(int numFrame=2; numFrame < MAX_FRAME; numFrame++)	
+    // {
+    //     // debugfile << "" << endl;
+    //     // debugfile << " Prev frame "<<  numFrame-1 << "- R " << prevR << endl;
+    //     // debugfile << " Prev frame "<<  numFrame-1 << "- t " << prevT << endl;
 
-        sprintf(filename, "/home/vagrant/shared/Kitti/00/image_1/%06d.png", numFrame);
+    //     sprintf(filename, "/home/vagrant/shared/Kitti/00/image_1/%06d.png", numFrame);
 
-        // ofstream triFile;
-        // char triname[100];
-        // sprintf(triname, "triangulate%06d.txt", numFrame);
-        // triFile.open (triname);
+    //     // ofstream triFile;
+    //     // char triname[100];
+    //     // sprintf(triname, "triangulate%06d.txt", numFrame);
+    //     // triFile.open (triname);
 
-        Mat currImage_c = imread(filename);
-        cvtColor(currImage_c, currImage, COLOR_BGR2GRAY);
-        // vector<uchar> status;
-        featureTracking(prevImage, currImage, prevFeatures, currFeatures);
+    //     Mat currImage_c = imread(filename);
+    //     cvtColor(currImage_c, currImage, COLOR_BGR2GRAY);
+    //     // vector<uchar> status;
+    //     featureTracking(prevImage, currImage, prevFeatures, currFeatures);
 
-        E = findEssentialMat(currFeatures, prevFeatures, cameraMatrix, RANSAC, 0.999, 1.0, mask);
-        recoverPose(E, currFeatures, prevFeatures, cameraMatrix, currR, currT, mask);
+    //     E = findEssentialMat(currFeatures, prevFeatures, cameraMatrix, RANSAC, 0.999, 1.0, mask);
+    //     recoverPose(E, currFeatures, prevFeatures, cameraMatrix, currR, currT, mask);
 
-        // debugfile << "" << endl;
-        // debugfile << " Curr frame "<<  numFrame << "- R " << currR << endl;
-        // debugfile << " Curr frame "<<  numFrame << "- t " << currT << endl;
+    //     // debugfile << "" << endl;
+    //     // debugfile << " Curr frame "<<  numFrame << "- R " << currR << endl;
+    //     // debugfile << " Curr frame "<<  numFrame << "- t " << currT << endl;
 
-        // debugfile << "" << endl;
-        // debugfile << "" << endl;
+    //     // debugfile << "" << endl;
+    //     // debugfile << "" << endl;
 
-        // debugfile << " frame "<<  numFrame << "- R " << currR << endl;
-        // debugfile << " frame "<<  numFrame << "- t " << currT <<endl;
+    //     // debugfile << " frame "<<  numFrame << "- R " << currR << endl;
+    //     // debugfile << " frame "<<  numFrame << "- t " << currT <<endl;
 
-        vector<Point3d> currPoints3d;
-        triangulation(prevFeatures, currFeatures, currR, currT, currPoints3d);
+    //     vector<Point3d> currPoints3d;
+    //     triangulation(prevFeatures, currFeatures, currR, currT, currPoints3d);
 
-        // triFile << "" << endl;
-        // for (size_t j=0; j < currPoints3d.size()-1; j++) 
-        // {
-        //     triFile << " curr points" << " " << currPoints3d[j] << endl;
-        // }
+    //     // triFile << "" << endl;
+    //     // for (size_t j=0; j < currPoints3d.size()-1; j++) 
+    //     // {
+    //     //     triFile << " curr points" << " " << currPoints3d[j] << endl;
+    //     // }
 
-        scale = 0;
-        count = 0;
+    //     scale = 0;
+    //     count = 0;
         
-        for (size_t j=0; j < currPoints3d.size()-1; j++) 
-        {
-            for (size_t k=j+1; k< currPoints3d.size(); k++) 
-            {
-                double s = norm(prevpoints3d[j] - prevpoints3d[k]) / norm(currPoints3d[j] - currPoints3d[k]);
-                // cout << s << endl;
-                // debugfile << "index j" << j << "index k" << k << endl;
-                // debugfile << "" << currPoints3d[j] << "" << currPoints3d[k] << endl;
-                if(0<s<10)
-                {
-                    scale += s;
-                    count++;
-                }
+    //     for (size_t j=0; j < currPoints3d.size()-1; j++) 
+    //     {
+    //         for (size_t k=j+1; k< currPoints3d.size(); k++) 
+    //         {
+    //             double s = norm(prevpoints3d[j] - prevpoints3d[k]) / norm(currPoints3d[j] - currPoints3d[k]);
                 
-            }
-        }
+    //             if(0<s<10)
+    //             {
+    //                 scale += s;
+    //                 count++;
+    //             }
+                
+    //         }
+    //     }
 
-        assert(count > 0);
-        scale /= count;
-        cout << scale << endl;
+    //     assert(count > 0);
+    //     scale /= count;
+    //     cout << scale << endl;
 
-        assert(0<scale<3);
+    //     assert(0<scale<3);
 
-        if(!isnan(scale))
-        {
-            if( (0<scale) && (scale<3))
-            {
-                t_f = t_f + (1/scale)*(R_f*currT);
-                R_f = currR*R_f;
+    //     if(!isnan(scale))
+    //     {
+    //         if( (0<scale) && (scale<3))
+    //         {
+    //             t_f = t_f + (1/scale)*(R_f*currT);
+    //             R_f = currR*R_f;
 
-            }
-            else
-            {
-                t_f = t_f + 1*(R_f*currT);
-                R_f = currR*R_f;
-            }
-        }
+    //         }
+    //         else
+    //         {
+    //             t_f = t_f + 1*(R_f*currT);
+    //             R_f = currR*R_f;
+    //         }
+    //     }
 
-        // debugfile << "" << endl;
-        // debugfile << "" << endl;
+    //     // debugfile << "" << endl;
+    //     // debugfile << "" << endl;
 
-        // debugfile << " frame "<<  numFrame << "- Propagated R " << R_f << endl;
-        // debugfile << " frame "<<  numFrame << "- Propagated t " << t_f << endl;
+    //     // debugfile << " frame "<<  numFrame << "- Propagated R " << R_f << endl;
+    //     // debugfile << " frame "<<  numFrame << "- Propagated t " << t_f << endl;
 
-        prevImage = currImage.clone();
-        prevFeatures = currFeatures;
-        prevpoints3d = currPoints3d;
-        prevR = currR;
-        prevT = currT;
-        prevScale = scale;
+    //     prevImage = currImage.clone();
+    //     prevFeatures = currFeatures;
+    //     prevpoints3d = currPoints3d;
+    //     prevR = currR;
+    //     prevT = currT;
+    //     prevScale = scale;
 
-        if (prevFeatures.size() < MIN_NUM_FEAT)
-        {
-            featureDetection(prevImage, prevFeatures);
-            featureTracking(prevImage,currImage,prevFeatures,currFeatures);
-        }
+    //     if (prevFeatures.size() < MIN_NUM_FEAT)
+    //     {
+    //         featureDetection(prevImage, prevFeatures);
+    //         featureTracking(prevImage,currImage,prevFeatures,currFeatures);
+    //     }
 
-        vector<double> Quat(4);
-        Quat = getQuaternion(R_f);
-        myfile << setprecision(6) << timesteps[numFrame] << setprecision(7) << " " << t_f.at<double>(0) << " " << t_f.at<double>(1) << " " << t_f.at<double>(2)
-            << " " << Quat[0] << " " << Quat[1] << " " << Quat[2] << " " << Quat[3] << endl;
-
-
-        prevImage = currImage.clone();
-        prevFeatures = currFeatures;
-        prevpoints3d = currPoints3d;
-        prevR = currR;
-        prevT = currT;
-
-        int x = int(t_f.at<double>(0)) + 300;
-        int y = int(t_f.at<double>(2)) + 100;
-        circle(traj, Point(x, y) ,1, CV_RGB(255,0,0), 2);
-
-        rectangle( traj, Point(10, 30), Point(550, 50), CV_RGB(0,0,0), CV_FILLED);
-        sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", t_f.at<double>(0), t_f.at<double>(1), t_f.at<double>(2));
-        putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255), thickness, 8);
-
-        std::vector<cv::KeyPoint> keypoints;
-        for( size_t i = 0; i < currFeatures.size(); i++ ) 
-        {
-            keypoints.push_back(cv::KeyPoint(currFeatures[i], 1.f));
-        }
-
-        drawKeypoints(currImage, keypoints, currImage, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
-
-        imshow( "Road facing camera", currImage );
-        imshow( "Trajectory", traj );
-
-        waitKey(10);
+    //     vector<double> Quat(4);
+    //     Quat = getQuaternion(R_f);
+    //     myfile << setprecision(6) << timesteps[numFrame] << setprecision(7) << " " << t_f.at<double>(0) << " " << t_f.at<double>(1) << " " << t_f.at<double>(2)
+    //         << " " << Quat[0] << " " << Quat[1] << " " << Quat[2] << " " << Quat[3] << endl;
 
 
-    }
+    //     prevImage = currImage.clone();
+    //     prevFeatures = currFeatures;
+    //     prevpoints3d = currPoints3d;
+    //     prevR = currR;
+    //     prevT = currT;
+
+    //     int x = int(t_f.at<double>(0)) + 300;
+    //     int y = int(t_f.at<double>(2)) + 100;
+    //     circle(traj, Point(x, y) ,1, CV_RGB(255,0,0), 2);
+
+    //     rectangle( traj, Point(10, 30), Point(550, 50), CV_RGB(0,0,0), CV_FILLED);
+    //     sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", t_f.at<double>(0), t_f.at<double>(1), t_f.at<double>(2));
+    //     putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255), thickness, 8);
+
+    //     std::vector<cv::KeyPoint> keypoints;
+    //     for( size_t i = 0; i < currFeatures.size(); i++ ) 
+    //     {
+    //         keypoints.push_back(cv::KeyPoint(currFeatures[i], 1.f));
+    //     }
+
+    //     drawKeypoints(currImage, keypoints, currImage, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
+
+    //     imshow( "Road facing camera", currImage );
+    //     imshow( "Trajectory", traj );
+
+    //     waitKey(10);
+
+
+    // }
 
     return 0;
 }
