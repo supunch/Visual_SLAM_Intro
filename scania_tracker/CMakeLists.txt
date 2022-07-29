@@ -21,7 +21,19 @@ SET( G2O_ROOT /home/vagrant/g2o )
 include_directories("/usr/include/eigen3")
 
 # OpenCV
-find_package(OpenCV 3.0 REQUIRED)
+# find_package(OpenCV 3.0 REQUIRED)
+# include_directories(${OpenCV_INCLUDE_DIRS})
+set(OpenCV_DIR /home/vagrant/opencv/build)
+set( OpenCV_FOUND 1 )
+
+find_package(OpenCV 4.4.0 QUIET)
+if(NOT OpenCV_FOUND)
+    find_package(OpenCV 4.4.0)
+    if(NOT OpenCV_FOUND)
+        message(FATAL_ERROR "OpenCV >= 4.4.0 not found")
+    endif()
+endif()
+message(STATUS "Use OpenCV ${OpenCV_VERSION}")
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 # pangolin

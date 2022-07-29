@@ -62,7 +62,7 @@ void reduceVector(vector<cv::Point2f> &v, vector<uchar> status)
     int count = 0;
     int j = 0;
     for (int i = 0; i < int(v.size()); i++)
-        if (!status[i])
+        if (status[i])
             v[j++] = v[i];
     v.resize(j);
 }
@@ -128,21 +128,24 @@ void featureTracking(Mat &img_1, Mat &img_2, vector<Point2f> &points1, vector<Po
 
     calcOpticalFlowPyrLK(img_1, img_2, points1, points2, status, err, winSize, 3, termcrit, 0, 0.001);
 
-    int indexCorrection = 0;
-    for( int i=0; i<status.size(); i++)
-    {
-        Point2f pt = points2.at(i- indexCorrection);
-        if ((status.at(i) == 0)||(pt.x<0)||(pt.y<0))
-        {
-            if((pt.x<0)||(pt.y<0))
-            {
-                status.at(i) = 0;
-            }
-            points1.erase (points1.begin() + (i - indexCorrection));
-            points2.erase (points2.begin() + (i - indexCorrection));
-            indexCorrection++;
-        }
-    }
+    reduceVector(points1,status);
+    reduceVector(points2,status);
+
+    // int indexCorrection = 0;
+    // for( int i=0; i<status.size(); i++)
+    // {
+    //     Point2f pt = points2.at(i- indexCorrection);
+    //     if ((status.at(i) == 0)||(pt.x<0)||(pt.y<0))
+    //     {
+    //         if((pt.x<0)||(pt.y<0))
+    //         {
+    //             status.at(i) = 0;
+    //         }
+    //         points1.erase (points1.begin() + (i - indexCorrection));
+    //         points2.erase (points2.begin() + (i - indexCorrection));
+    //         indexCorrection++;
+    //     }
+    // }
 }
 
 void featureDetection(Mat &img_1, vector<Point2f> &points1)
@@ -154,41 +157,6 @@ void featureDetection(Mat &img_1, vector<Point2f> &points1)
     FAST(img_1, keypoints_1, fast_threshold, nonmaxSuppression);
     // detector->detect(img_1,keypoints_1);
     KeyPoint::convert(keypoints_1, points1, vector<int>());
-}
-
-double getAbsoluteScale(int frame_id)
-{
-    string line;
-    int i = 0;
-    ifstream myfile ("/home/vagrant/shared/Kitti/01/00.txt");
-    double x =0, y=0, z = 0;
-    double x_prev, y_prev, z_prev;
-    if (myfile.is_open())
-    {   
-        while (( getline (myfile,line) ) && (i<=frame_id))
-        {
-            z_prev = z;
-            x_prev = x;
-            y_prev = y;
-            std::istringstream in(line);
-            for (int j=0; j<12; j++)  
-            {
-                in >> z ;
-                if (j==7) y=z;
-                if (j==3)  x=z;
-            }
-            
-            i++;
-        }
-        myfile.close();
-    }
-    else 
-    {
-        cout << "Unable to open file";
-        return 0;
-    }
-
-    return sqrt((x-x_prev)*(x-x_prev) + (y-y_prev)*(y-y_prev) + (z-z_prev)*(z-z_prev)) ;
 }
 
 bool getFileContent(string fileName, vector<double> & vec)
