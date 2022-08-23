@@ -67,16 +67,6 @@ void reduceVector(vector<cv::Point2f> &v, vector<uchar> status)
     v.resize(j);
 }
 
-void reduceVectorSem(vector<cv::Point2f> &v, vector<uchar> status)
-{
-    int count = 0;
-    int j = 0;
-    for (int i = 0; i < int(v.size()); i++)
-        if (!status[i])
-            v[j++] = v[i];
-    v.resize(j);
-}
-
 void morphOps(Mat &thresh){
 
     Mat erodeElement = getStructuringElement(MORPH_RECT, Size(3, 3));
@@ -98,40 +88,35 @@ void filterSem(Mat &imgSem, vector<cv::Point2f> &points)
     vector<uchar> status(points.size());
     
 
-    cvtColor(imgSem, frame_HSV, COLOR_BGR2HSV);
-    inRange(frame_HSV, Scalar(1, 0, 0), Scalar(168, 255, 255), frame_threshold);
+    // cvtColor(imgSem, frame_HSV, COLOR_BGR2HSV);
+    // inRange(frame_HSV, Scalar(1, 0, 0), Scalar(168, 255, 255), frame_threshold);
 
-    morphOps(frame_threshold);
+    // morphOps(frame_threshold);
 
-    findContours( frame_threshold, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE );
+    // findContours( frame_threshold, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE );
 
-    vector<vector<Point> > contours_poly( contours.size() );
-    vector<Rect> boundRect( contours.size() );
+    // vector<vector<Point> > contours_poly( contours.size() );
+    // vector<Rect> boundRect( contours.size() );
 
-    for( size_t i = 0; i < contours.size(); i++ )
-    {
-        approxPolyDP( contours[i], contours_poly[i], 3, true );
-        boundRect[i] = boundingRect( contours_poly[i]);
-    }
+    // for( size_t i = 0; i < contours.size(); i++ )
+    // {
+    //     approxPolyDP( contours[i], contours_poly[i], 3, true );
+    //     boundRect[i] = boundingRect( contours_poly[i]);
+    // }
 
-    for(size_t i = 0; i < points.size(); i++)
-    {
-        for(size_t j = 1; j<= boundRect.size(); j++)
-        {            
-            if(boundRect[j].contains(points[i]))
-            {
-                status[i] = 1;
-            }
-        }
-    }
+    // for(size_t i = 0; i < points.size(); i++)
+    // {
+    //     for(size_t j = 1; j<= boundRect.size(); j++)
+    //     {            
+    //         if(boundRect[j].contains(points[i]))
+    //         {
+    //             status[i] = 1;
+    //         }
+    //     }
+    // }
 
-    reduceVectorSem(points, status);
+    reduceVector(points, status);
 
-}
-
-void findsemantics(Mat &imgSem, vector<cv::Point2f> &points)
-{
-    
 }
 
 void featureTracking(Mat &img_1, Mat &img_2, vector<Point2f> &points1, vector<Point2f> &points2)
