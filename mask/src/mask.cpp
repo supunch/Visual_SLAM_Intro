@@ -131,8 +131,8 @@ int main( int argc, const char** argv )
     // createTrackbar("High V", window_detection_name, &high_V, max_value, on_high_V_thresh_trackbar);
     Mat frame, frame_HSV, frame_threshold;
 
-    img = imread("/home/vagrant/shared/scania_raw_undistorted_2/000085.png");
-    img_sem = imread("/home/vagrant/shared/scania_sem_images_2/000085.png");
+    img = imread("/home/vagrant/shared/scania_images_undistorted/frame000085.png");
+    img_sem = imread("/home/vagrant/shared/scania_sem_images/frame000085.png");
 
     frame = img.clone();
 
@@ -193,7 +193,7 @@ int main( int argc, const char** argv )
         cv::Vec3b color = img_sem.at<cv::Vec3b>(cv::Point(points1[i].x,points1[i].y));
         // myfile << points1[i] << "   color : " <<  (int)color[0] << " ," << (int)color[1] << " ," << (int)color[2] << " " << std::endl;
         bool cars = ((int)color[0] == 0 && (int)color[1] == 0 && (int)color[2] == 255);
-        bool road = ((int)color[0] == 0 && (int)color[1] == 245 && (int)color[2] == 0);
+        bool road = ((int)color[0] == 0 && (int)color[1] == 244 && (int)color[2] == 0);
 
         if(!cars && !road)
         {

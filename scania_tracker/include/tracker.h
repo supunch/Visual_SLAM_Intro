@@ -48,14 +48,54 @@ std::vector<double> getQuaternion(const cv::Mat &M)
     Eigen::Matrix<double,3,3> eigMat = toMatrix3d(M);
     Eigen::Quaterniond q(eigMat);
 
+    Eigen::Quaterniond r(cos(M_PI/4), 0, 0, sin(M_PI/4));
+
+    Eigen::Quaterniond new_q = r * q * r.inverse();
+
     std::vector<double> v(4);
-    v[0] = q.x();
-    v[1] = q.y();
-    v[2] = q.z();
-    v[3] = q.w();
+    v[0] = new_q.x();
+    v[1] = new_q.y();
+    v[2] = new_q.z();
+    v[3] = new_q.w();
 
     return v;
 }
+// void getQuaternion_rotxy(const cv::Mat &R, const Mat &T, std::ofstream &file, double timestep)
+// {
+//     Mat Transform_ = (Mat_<float>(4, 4) <<
+//                 R.at<double>(0, 0), R.at<double>(0, 1), R.at<double>(0, 2), T.at<double>(0, 0),
+//                 R.at<double>(1, 0), R.at<double>(1, 1), R.at<double>(1, 2), T.at<double>(1, 0),
+//                 R.at<double>(2, 0), R.at<double>(2, 1), R.at<double>(2, 2), T.at<double>(2, 0),
+//                 0                 , 0                 , 0                  , 1);
+    
+//     Mat Correction = (Mat_<float>(4, 4) << 1,   0,           0,         0,
+//                                            0,   cos(M_PI/2),  -sin(M_PI/2), 0,
+//                                            0,   sin(M_PI/2),   cos(M_PI/2), 0,
+//                                            0,   0,           0,         1);
+
+//     Mat C_Transform = Transform_ * Correction;
+
+//     Mat New_R = (Mat_<float>(3, 3) <<
+//                 C_Transform.at<double>(0, 0), C_Transform.at<double>(0, 1), C_Transform.at<double>(0, 2),
+//                 C_Transform.at<double>(1, 0), C_Transform.at<double>(1, 1), C_Transform.at<double>(1, 2),
+//                 C_Transform.at<double>(2, 0), C_Transform.at<double>(2, 1), C_Transform.at<double>(2, 2));
+
+    
+
+//     Eigen::Matrix<double,3,3> eigMat = toMatrix3d(New_R) ;
+//     Eigen::Quaterniond q(eigMat);
+
+//     std::vector<double> v(4);
+//     v[0] = q.x();
+//     v[1] = q.y();
+//     v[2] = q.z();
+//     v[3] = q.w();
+
+//     // file << setprecision(6) << timestep << setprecision(7) << " " << T.at<double>(0) << " " << -T.at<double>(2) << " " << T.at<double>(1)
+//     //         << " " << v[0] << " " << v[1] << " " << v[2] << " " << v[3] << endl;
+//     file << setprecision(6) << timestep << setprecision(7) << " " << C_Transform.at<double>(0, 3) << " " << C_Transform.at<double>(1, 3) << " " << C_Transform.at<double>(2, 3)
+//             << " " << v[0] << " " << v[1] << " " << v[2] << " " << v[3] << endl;
+// }
 
 void reduceVector(vector<cv::Point2f> &v, vector<uchar> status)
 {
@@ -89,49 +129,69 @@ void morphOps(Mat &thresh){
 	dilate(thresh, thresh, dilateElement);
 }
 
+// void filterSem(Mat &imgSem, vector<cv::Point2f> &points)
+// {
+//     Mat frame_HSV, frame_threshold;
+    
+//     vector<vector<cv::Point> > contours;
+//     vector<cv::Vec4i> hierarchy;
+//     vector<uchar> status(points.size());
+    
+
+//     cvtColor(imgSem, frame_HSV, COLOR_BGR2HSV);
+//     inRange(frame_HSV, Scalar(1, 0, 0), Scalar(168, 255, 255), frame_threshold);
+
+//     morphOps(frame_threshold);
+
+//     findContours( frame_threshold, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE );
+
+//     vector<vector<Point> > contours_poly( contours.size() );
+//     vector<Rect> boundRect( contours.size() );
+
+//     for( size_t i = 0; i < contours.size(); i++ )
+//     {
+//         approxPolyDP( contours[i], contours_poly[i], 3, true );
+//         boundRect[i] = boundingRect( contours_poly[i]);
+//     }
+
+//     for(size_t i = 0; i < points.size(); i++)
+//     {
+//         for(size_t j = 1; j<= boundRect.size(); j++)
+//         {            
+//             if(boundRect[j].contains(points[i]))
+//             {
+//                 status[i] = 1;
+//             }
+//         }
+//     }
+
+//     reduceVectorSem(points, status);
+
+// }
+
+
 void filterSem(Mat &imgSem, vector<cv::Point2f> &points)
 {
-    Mat frame_HSV, frame_threshold;
-    
-    vector<vector<cv::Point> > contours;
-    vector<cv::Vec4i> hierarchy;
     vector<uchar> status(points.size());
-    
 
-    cvtColor(imgSem, frame_HSV, COLOR_BGR2HSV);
-    inRange(frame_HSV, Scalar(1, 0, 0), Scalar(168, 255, 255), frame_threshold);
-
-    morphOps(frame_threshold);
-
-    findContours( frame_threshold, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE );
-
-    vector<vector<Point> > contours_poly( contours.size() );
-    vector<Rect> boundRect( contours.size() );
-
-    for( size_t i = 0; i < contours.size(); i++ )
+    for( size_t i = 0; i < points.size(); i++ ) 
     {
-        approxPolyDP( contours[i], contours_poly[i], 3, true );
-        boundRect[i] = boundingRect( contours_poly[i]);
-    }
+        // keypoints1.push_back(cv::KeyPoint(points1[i], 1.f));
+        cv::Vec3b color = imgSem.at<cv::Vec3b>(cv::Point(points[i].x,points[i].y));
+        // myfile << points1[i] << "   color : " <<  (int)color[0] << " ," << (int)color[1] << " ," << (int)color[2] << " " << std::endl;
+        bool cars = ((int)color[0] == 0 && (int)color[1] == 0 && (int)color[2] == 255);
+        bool road = ((int)color[0] == 0 && (int)color[1] == 244 && (int)color[2] == 0);
 
-    for(size_t i = 0; i < points.size(); i++)
-    {
-        for(size_t j = 1; j<= boundRect.size(); j++)
-        {            
-            if(boundRect[j].contains(points[i]))
-            {
-                status[i] = 1;
-            }
+        if(cars || road )
+        {
+            // myfile << points1[i] << "   color : " <<  (int)color[0] << " ," << (int)color[1] << " ," << (int)color[2] << " " << std::endl;
+            // keypoints2.push_back(cv::KeyPoint(points1[i], 1.f));
+            // points2.push_back(points1[i]);
+            status[i] = 1;
         }
     }
 
     reduceVectorSem(points, status);
-
-}
-
-void findsemantics(Mat &imgSem, vector<cv::Point2f> &points)
-{
-    
 }
 
 void featureTracking(Mat &img_1, Mat &img_2, vector<Point2f> &points1, vector<Point2f> &points2)
